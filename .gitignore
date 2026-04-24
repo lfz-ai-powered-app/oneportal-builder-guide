@@ -1,0 +1,54 @@
+# ─────────────────────────────────────────────────────────────────────
+# The template/ folder lives as its own repo at
+#   https://github.com/lfz-ai-powered-app/portal-template
+# It is NOT tracked here — edit & commit it independently from its
+# own .git folder.
+# ─────────────────────────────────────────────────────────────────────
+template/
+
+# Build output
+bin/
+obj/
+out/
+*.user
+*.userprefs
+*.suo
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+
+# Secrets — never commit
+*.secrets.json
+secrets.json
+appsettings.*.local.json
+*.pfx
+*.key
+*.pem
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# OS cruft
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# NuGet
+.nuget/
+packages/
+*.nuget.props
+*.nuget.targets
+
+# EF Core
+**/Migrations/*Snapshot.cs.bak

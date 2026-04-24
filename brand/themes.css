@@ -1,0 +1,166 @@
+/* Light Theme (Default) */
+:root {
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --bg-sidebar: #ffffff;
+    
+    /* Text Colors */
+    --text-primary: #1e293b;
+    --text-secondary: #374151;
+    --text-tertiary: #6b7280;
+    --text-muted: #9ca3af;
+    --text-sidebar: #374151;
+    --text-sidebar-hover: #1e293b;
+    
+    /* Border Colors */
+    --border-primary: #e2e8f0;
+    --border-secondary: #d1d5db;
+    --border-focus: #3b82f6;
+    
+    /* Accent Colors */
+    --accent-primary: #1e40af;
+    --accent-hover: #1d4ed8;
+    --accent-light: #dbeafe;
+    --accent-dark: #001f57;
+    
+    /* Card Colors */
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --card-border: #e2e8f0;
+    
+    /* Button Colors */
+    --btn-primary-bg: #1e40af;
+    --btn-primary-hover: #1d4ed8;
+    --btn-primary-text: #ffffff;
+    --btn-secondary-bg: #ffffff;
+    --btn-secondary-hover: #f8fafc;
+    --btn-secondary-text: #374151;
+    --btn-secondary-border: #d1d5db;
+    
+    /* Input Colors */
+    --input-bg: #ffffff;
+    --input-border: #d1d5db;
+    --input-focus: #3b82f6;
+    --input-placeholder: #9ca3af;
+    
+    /* Status Colors */
+    --success: #10b981;
+    --success-bg: #f0fdf4;
+    --error: #ef4444;
+    --error-bg: #fef2f2;
+    --warning: #f59e0b;
+    --warning-bg: #fffbeb;
+    
+    /* Shadow Colors */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme */
+.dark-theme {
+    /* Background Colors */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --bg-sidebar: #1e293b;
+    
+    /* Text Colors */
+    --text-primary: #f8fafc;
+    --text-secondary: #e2e8f0;
+    --text-tertiary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --text-sidebar: #cbd5e1;
+    --text-sidebar-hover: #ffffff;
+    
+    /* Border Colors */
+    --border-primary: #334155;
+    --border-secondary: #475569;
+    --border-focus: #60a5fa;
+    
+    /* Accent Colors */
+    --accent-primary: #60a5fa;
+    --accent-hover: #3b82f6;
+    --accent-light: #1e40af;
+    --accent-dark: #1e3a8a;
+    
+    /* Card Colors */
+    --card-bg: #1e293b;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --card-border: #334155;
+    
+    /* Button Colors */
+    --btn-primary-bg: #3b82f6;
+    --btn-primary-hover: #2563eb;
+    --btn-primary-text: #ffffff;
+    --btn-secondary-bg: #334155;
+    --btn-secondary-hover: #475569;
+    --btn-secondary-text: #e2e8f0;
+    --btn-secondary-border: #475569;
+    
+    /* Input Colors */
+    --input-bg: #334155;
+    --input-border: #475569;
+    --input-focus: #60a5fa;
+    --input-placeholder: #94a3b8;
+    
+    /* Status Colors */
+    --success: #34d399;
+    --success-bg: #064e3b;
+    --error: #f87171;
+    --error-bg: #7f1d1d;
+    --warning: #fbbf24;
+    --warning-bg: #78350f;
+    
+    /* Shadow Colors */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Global Theme Transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Base Body Styles */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+/* Dark mode scrollbar */
+.dark-theme ::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+    background: var(--border-primary);
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}

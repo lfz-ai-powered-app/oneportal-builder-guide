@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Build Your App — A Simple Guide (Lagos Free Zone)</title>
+<meta name="description" content="A friendly, non-technical, step-by-step guide to building and running your app locally using Claude Code and Visual Studio. When you're done, hand it off and someone else deploys it for you." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Ubuntu+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+  /* ──────────── LFZ brand tokens ──────────── */
+  :root {
+    --lfz-navy:       #002b5c;
+    --portal-navy:    #001f57;
+    --lfz-orange:     #f04925;
+    --lfz-grey:       #7a7d84;
+
+    --bg-primary:     #ffffff;
+    --bg-secondary:   #f8fafc;
+    --bg-tertiary:    #f1f5f9;
+    --text-primary:   #1e293b;
+    --text-secondary: #374151;
+    --text-muted:     #64748b;
+    --border:         #e2e8f0;
+    --border-soft:    #eef2f7;
+
+    --success:        #10b981;
+    --success-soft:   #ecfdf5;
+    --warning:        #f59e0b;
+    --warning-soft:   #fffbeb;
+    --danger:         #ef4444;
+    --danger-soft:    #fef2f2;
+    --info:           #3b82f6;
+    --info-soft:      #eff6ff;
+
+    --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+    --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+    --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+
+    --sidebar-w: 300px;
+    --header-h: 64px;
+  }
+
+  html.dark-theme {
+    --bg-primary:     #0f172a;
+    --bg-secondary:   #111c33;
+    --bg-tertiary:    #1e293b;
+    --text-primary:   #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted:     #94a3b8;
+    --border:         #1f2d4a;
+    --border-soft:    #182340;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.5);
+    --shadow-lg: 0 12px 28px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Ubuntu', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    scroll-behavior: smooth;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  code, pre, kbd, samp {
+    font-family: 'Ubuntu Mono', Consolas, 'Courier New', monospace;
+  }
+
+  kbd {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 0.82em;
+    color: var(--text-primary);
+  }
+
+  /* ──────────── Header ──────────── */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--header-h);
+    background: var(--portal-navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    box-shadow: var(--shadow-md);
+  }
+  .app-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .app-header .brand .logo {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #fff; color: var(--portal-navy);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.95rem;
+  }
+  .app-header .spacer { flex: 1; }
+  .header-btn {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  .header-btn:hover { background: rgba(255,255,255,0.18); }
+  .menu-toggle { display: none; }
+
+  /* ──────────── Layout ──────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: calc(100vh - var(--header-h));
+  }
+  .sidebar {
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: sticky;
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+    overflow-y: auto;
+  }
+  .sidebar h4 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    margin: 16px 24px 8px;
+    font-weight: 700;
+  }
+  .toc { list-style: none; padding: 0; margin: 0; }
+  .toc li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 24px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .toc li a:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .toc li a.active {
+    background: linear-gradient(90deg, rgba(240,73,37,0.08), transparent);
+    border-left-color: var(--lfz-orange);
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .toc-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bg-tertiary); color: var(--text-secondary);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.82rem; font-weight: 700; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .toc li a.active .toc-num { background: var(--lfz-orange); color: #fff; }
+
+  main.content {
+    padding: 40px clamp(24px, 4vw, 64px) 80px;
+    max-width: 1000px;
+  }
+
+  /* ──────────── Hero ──────────── */
+  .hero {
+    background: linear-gradient(135deg, var(--portal-navy) 0%, var(--lfz-navy) 60%, #002b5c 100%);
+    color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 44px 44px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .hero::after {
+    content: '';
+    position: absolute; right: -60px; top: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(240,73,37,0.35), transparent 70%);
+  }
+  .hero h1 {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    margin: 0 0 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    opacity: 0.94;
+    margin: 0 0 22px;
+    max-width: 720px;
+  }
+  .hero .pills { display: flex; flex-wrap: wrap; gap: 8px; position: relative; z-index: 1; }
+  .hero .pill {
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ──────────── Section ──────────── */
+  .section {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 38px 42px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-sm);
+    scroll-margin-top: calc(var(--header-h) + 16px);
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--lfz-orange), #d63e1f);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 10px rgba(240,73,37,0.3);
+    flex-shrink: 0;
+  }
+  .section h2 {
+    font-size: 1.6rem;
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .section .req-tag {
+    margin-left: auto;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .section p, .section li { color: var(--text-secondary); font-size: 1.02rem; }
+  .section h3 {
+    font-size: 1.15rem;
+    margin: 28px 0 10px;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .section a { color: var(--info); text-decoration: none; font-weight: 500; }
+  .section a:hover { text-decoration: underline; }
+  .section strong { color: var(--text-primary); }
+
+  /* ──────────── Numbered step cards (inside sections) ──────────── */
+  .mini-steps { counter-reset: mstep; margin: 18px 0; }
+  .mini-step {
+    position: relative;
+    padding: 18px 22px 18px 64px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+  }
+  .mini-step::before {
+    counter-increment: mstep;
+    content: counter(mstep);
+    position: absolute;
+    left: 18px; top: 16px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--portal-navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .mini-step h4 {
+    margin: 0 0 6px;
+    font-size: 1.02rem;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .mini-step p  { margin: 0; color: var(--text-secondary); font-size: 0.96rem; }
+  .mini-step p + p { margin-top: 6px; }
+
+  /* ──────────── Callouts ──────────── */
+  .callout {
+    display: flex;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    margin: 22px 0;
+    border-left: 4px solid;
+  }
+  .callout i { font-size: 1.3rem; line-height: 1.4; flex-shrink: 0; }
+  .callout .body { flex: 1; font-size: 0.98rem; }
+  .callout.info    { background: var(--info-soft);    border-left-color: var(--info);    }
+  .callout.success { background: var(--success-soft); border-left-color: var(--success); }
+  .callout.warning { background: var(--warning-soft); border-left-color: var(--warning); }
+  .callout.danger  { background: var(--danger-soft);  border-left-color: var(--danger);  }
+  html.dark-theme .callout.info    { background: rgba(59,130,246,0.1); }
+  html.dark-theme .callout.success { background: rgba(16,185,129,0.1); }
+  html.dark-theme .callout.warning { background: rgba(245,158,11,0.1); }
+  html.dark-theme .callout.danger  { background: rgba(239,68,68,0.1); }
+
+  /* ──────────── Tool cards ──────────── */
+  .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 22px 0; }
+  .tool-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .tool-card .tc-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--portal-navy), var(--lfz-navy));
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+  }
+  .tool-card .tc-body { flex: 1; }
+  .tool-card h4 { margin: 0 0 4px; font-size: 1rem; font-weight: 600; color: var(--text-primary); }
+  .tool-card p  { margin: 0 0 8px; font-size: 0.9rem; color: var(--text-secondary); }
+  .tool-card a.btn-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--lfz-orange);
+    color: #fff !important;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    text-decoration: none !important;
+  }
+  .tool-card a.btn-link:hover { background: #d63e1f; }
+
+  /* ──────────── Screenshot frames ──────────── */
+  .screenshot {
+    margin: 22px 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+  .screenshot-chrome {
+    background: linear-gradient(180deg, #e5e9ef, #d2d7df);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #b6bfca;
+  }
+  .screenshot-chrome .dots { display: flex; gap: 6px; }
+  .screenshot-chrome .dots span {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 0.5px solid rgba(0,0,0,0.08);
+  }
+  .screenshot-chrome .dots .d1 { background: #ff5f56; }
+  .screenshot-chrome .dots .d2 { background: #ffbd2e; }
+  .screenshot-chrome .dots .d3 { background: #27c93f; }
+  .screenshot-chrome .title {
+    flex: 1;
+    text-align: center;
+    font-size: 0.82rem;
+    color: #4a5568;
+    font-weight: 500;
+    font-family: 'Ubuntu', sans-serif;
+  }
+  html.dark-theme .screenshot-chrome {
+    background: linear-gradient(180deg, #232b3d, #1a2033);
+    border-bottom-color: #11182b;
+  }
+  html.dark-theme .screenshot-chrome .title { color: #94a3b8; }
+
+  .screenshot svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #fff;
+  }
+  html.dark-theme .screenshot svg { background: #f4f6fa; }
+
+  .screenshot-caption {
+    padding: 10px 16px 12px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+  }
+  .screenshot-caption b {
+    color: var(--lfz-orange);
+    font-style: normal;
+  }
+
+  /* ──────────── Tables ──────────── */
+  .table-wrap { overflow-x: auto; margin: 18px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.96rem;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  table th {
+    background: var(--bg-tertiary);
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    border-bottom: 2px solid var(--border);
+  }
+  table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  table tr:last-child td { border-bottom: none; }
+  table tr:hover td { background: var(--bg-secondary); }
+
+  /* ──────────── Code ──────────── */
+  pre[class*="language-"] {
+    border-radius: var(--radius-md);
+    margin: 18px 0;
+    padding: 18px 20px !important;
+    font-size: 0.9rem !important;
+    line-height: 1.65 !important;
+    box-shadow: var(--shadow-sm);
+  }
+  :not(pre) > code {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-soft);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.88em;
+    color: var(--lfz-orange);
+  }
+  html.dark-theme :not(pre) > code { color: #ffb8a3; }
+
+  /* ──────────── Checklist ──────────── */
+  .checklist {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    margin: 22px 0;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    user-select: none;
+  }
+  .checklist-item input[type="checkbox"] {
+    appearance: none;
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    margin-top: 2px; flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .checklist-item input[type="checkbox"]:checked {
+    background: var(--lfz-orange);
+    border-color: var(--lfz-orange);
+  }
+  .checklist-item input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: #fff;
+    position: absolute;
+    left: 4px; top: -2px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .checklist-item input[type="checkbox"]:checked + span {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+
+  /* ──────────── Prompt card ──────────── */
+  .prompt-card {
+    border: 2px solid var(--lfz-orange);
+    border-radius: var(--radius-md);
+    margin: 22px 0;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+  .prompt-head {
+    background: linear-gradient(90deg, var(--portal-navy), var(--lfz-navy));
+    color: #fff;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .prompt-head .tag {
+    background: var(--lfz-orange);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+  }
+  .prompt-head .name { font-weight: 500; flex: 1; }
+  .prompt-body-inner { padding: 22px 26px; }
+  .copy-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f172a;
+    color: #e5eef9;
+    padding: 8px 14px 8px 18px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    font-size: 0.84rem;
+    font-family: 'Ubuntu Mono', monospace;
+  }
+  .copy-row .lbl { color: #94a3b8; }
+  .copy-btn {
+    background: var(--lfz-orange);
+    color: #fff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 0.86rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: #d63e1f; }
+  .copy-btn.copied { background: var(--success); }
+  .prompt-pre {
+    margin: 0 !important;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm) !important;
+    max-height: 620px;
+    overflow-y: auto;
+  }
+  .edit-hint {
+    background: var(--warning-soft);
+    border-left: 3px solid var(--warning);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    margin-bottom: 14px;
+    color: var(--text-primary);
+  }
+  html.dark-theme .edit-hint { background: rgba(245,158,11,0.12); color: var(--text-primary); }
+
+  /* ──────────── Progress ──────────── */
+  .progress-badge {
+    position: fixed;
+    right: 28px; bottom: 28px;
+    background: var(--portal-navy);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-badge .count {
+    background: var(--lfz-orange);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+
+  /* ──────────── Grids ──────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .mini-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+  }
+  .mini-card h4 { margin: 0 0 6px; font-size: 0.98rem; font-weight: 600; color: var(--text-primary); }
+  .mini-card p  { margin: 0; font-size: 0.92rem; color: var(--text-secondary); }
+
+  /* ──────────── Responsive ──────────── */
+  @media (max-width: 1024px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed; top: var(--header-h); left: -100%;
+      width: 88%; max-width: 320px;
+      height: calc(100vh - var(--header-h));
+      z-index: 80;
+      transition: left 0.25s ease;
+      box-shadow: var(--shadow-lg);
+    }
+    .sidebar.open { left: 0; }
+    .menu-toggle { display: inline-flex; }
+    .section { padding: 28px 22px; }
+    .hero { padding: 32px 24px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    main.content { padding: 24px 14px 64px; }
+    .section-head h2 { font-size: 1.3rem; }
+    .hero h1 { font-size: 1.55rem; }
+    .progress-badge { right: 14px; bottom: 14px; font-size: 0.8rem; }
+  }
+
+  @media print {
+    .app-header, .sidebar, .progress-badge { display: none; }
+    .shell { grid-template-columns: 1fr; }
+    .section { break-inside: avoid; box-shadow: none; border-color: #ccc; }
+    .hero { background: #001f57 !important; color: #fff !important; -webkit-print-color-adjust: exact; }
+    a { color: inherit; text-decoration: none; }
+  }
+
+  hr.spacer { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+</style>
+</head>
+<body>
+
+<!-- ═════ HEADER ═════ -->
+<header class="app-header">
+  <button class="header-btn menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+    <i class="bi bi-list"></i>
+  </button>
+  <div class="brand">
+    <div class="logo">LFZ</div>
+    <div>Build Your App — Step-by-Step</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="header-btn" id="themeToggle" aria-label="Toggle theme">
+    <i class="bi bi-moon-stars-fill"></i>
+  </button>
+  <button class="header-btn" onclick="window.print()" aria-label="Print">
+    <i class="bi bi-printer"></i>
+  </button>
+</header>
+
+<div class="shell">
+
+  <!-- ═════ SIDEBAR ═════ -->
+  <aside class="sidebar" id="sidebar">
+    <h4>Follow in order</h4>
+    <ul class="toc" id="toc">
+      <li><a href="#intro"><span class="toc-num"><i class="bi bi-house"></i></span> Welcome</a></li>
+      <li><a href="#s1"><span class="toc-num">1</span> Install the tools</a></li>
+      <li><a href="#s2"><span class="toc-num">2</span> Get the project</a></li>
+      <li><a href="#s3"><span class="toc-num">3</span> Open in Visual Studio</a></li>
+      <li><a href="#s4"><span class="toc-num">4</span> Tell Claude what to build</a></li>
+      <li><a href="#s5"><span class="toc-num">5</span> Run it locally</a></li>
+      <li><a href="#s6"><span class="toc-num">6</span> Test what you built</a></li>
+      <li><a href="#s7"><span class="toc-num">7</span> Commit your work</a></li>
+      <li><a href="#s8"><span class="toc-num">8</span> Hand it over</a></li>
+    </ul>
+    <h4>Handy references</h4>
+    <ul class="toc">
+      <li><a href="#trouble"><span class="toc-num"><i class="bi bi-life-preserver"></i></span> If something breaks</a></li>
+      <li><a href="#glossary"><span class="toc-num"><i class="bi bi-book"></i></span> Glossary</a></li>
+    </ul>
+  </aside>
+
+  <!-- ═════ MAIN ═════ -->
+  <main class="content">
+
+    <!-- ───────── HERO ───────── -->
+    <section id="intro" class="hero">
+      <h1>You're going to build a working app. Locally. Today.</h1>
+      <p>This guide walks you through the whole thing in 8 simple steps. No prior coding experience needed — you'll install a few tools, paste one prompt into Claude Code, run the app on your computer, test it, and commit your work. Someone else will handle deployment.</p>
+      <div class="pills">
+        <span class="pill">⏱ About 1 hour</span>
+        <span class="pill">🧰 8 steps</span>
+        <span class="pill">🤖 1 prompt to Claude Code</span>
+        <span class="pill">💻 Works on Windows</span>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 1 — Install the tools
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s1" class="section">
+      <div class="section-head">
+        <div class="step-badge">1</div>
+        <h2>Install the tools</h2>
+        <span class="req-tag">One-time setup</span>
+      </div>
+
+      <p>These are the programs you need. Each one has a big blue "Download" button on the official site. Install them in the order listed below. It takes about 20–30 minutes of mostly clicking "Next".</p>
+
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tc-icon"><i class="bi bi-window-desktop"></i></div>
+          <div class="tc-body">
+            <h4>Visual Studio 2022 (Community)</h4>
+            <p>The program you'll write your app in. Community edition is free.</p>
+            <p><strong>Important:</strong> during install, tick the checkbox called <em>"ASP.NET and web development"</em>. That one click brings the .NET SDK, SQL LocalDB, and everything else your app needs.</p>
+            <a class="btn-link" href="https://visualstudio.microsoft.com/downloads/" target="_blank"><i class="bi bi-download"></i> Download</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tc-icon"><i class="bi bi-database"></i></div>
+          <div class="tc-body">
+            <h4>SQL Server Management Studio</h4>
+            <p>A tool to look inside your app's database. You'll only open it if Claude asks you to run a script.</p>
+            <a class="btn-link" href="https://aka.ms/ssms" target="_blank"><i class="bi bi-download"></i> Download</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tc-icon"><i class="bi bi-git"></i></div>
+          <div class="tc-body">
+            <h4>Git for Windows</h4>
+            <p>The "save history" system for code. Accept the defaults during install.</p>
+            <a class="btn-link" href="https://git-scm.com/download/win" target="_blank"><i class="bi bi-download"></i> Download</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tc-icon"><i class="bi bi-robot"></i></div>
+          <div class="tc-body">
+            <h4>Claude Code</h4>
+            <p>Your AI pair programmer. You'll paste one prompt into it and it does the heavy lifting.</p>
+            <a class="btn-link" href="https://claude.com/claude-code" target="_blank"><i class="bi bi-download"></i> Download</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tc-icon"><i class="bi bi-github"></i></div>
+          <div class="tc-body">
+            <h4>GitHub account (browser only)</h4>
+            <p>You need an account to push your work. Sign up, then ask your integrator to add you to the organization.</p>
+            <a class="btn-link" href="https://github.com/join" target="_blank"><i class="bi bi-download"></i> Sign up</a>
+          </div>
+        </div>
+      </div>
+
+      <h3>Important: during Visual Studio setup, tick this box</h3>
+      <p>When the Visual Studio Installer asks you to choose "Workloads", find the tile called <strong>ASP.NET and web development</strong> and tick its checkbox. That one choice brings everything else you need.</p>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">Visual Studio Installer — Workloads</div>
+        </div>
+        <svg viewBox="0 0 780 360" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="360" fill="#f3f3f3"/>
+          <!-- sidebar -->
+          <rect x="0" y="0" width="160" height="360" fill="#fafafa"/>
+          <rect x="0" y="20" width="160" height="36" fill="#e1e1e1"/>
+          <text x="16" y="42" font-family="Segoe UI,Ubuntu,sans-serif" font-size="13" fill="#333" font-weight="600">Workloads</text>
+          <text x="16" y="78" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#888">Individual components</text>
+          <text x="16" y="102" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#888">Language packs</text>
+          <text x="16" y="126" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#888">Installation locations</text>
+
+          <!-- tiles -->
+          <g transform="translate(180, 30)">
+            <rect width="180" height="110" rx="4" fill="#fff" stroke="#c7c7c7"/>
+            <rect x="8" y="8" width="26" height="26" rx="4" fill="#68217a"/>
+            <text x="42" y="26" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#333" font-weight="600">ASP.NET and web</text>
+            <text x="42" y="42" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#333" font-weight="600">development</text>
+            <text x="8" y="68" font-family="Segoe UI,Ubuntu,sans-serif" font-size="10.5" fill="#555">Build web apps with</text>
+            <text x="8" y="84" font-family="Segoe UI,Ubuntu,sans-serif" font-size="10.5" fill="#555">ASP.NET Core, .NET, Blazor</text>
+            <!-- tick -->
+            <rect x="148" y="8" width="22" height="22" rx="3" fill="#0078d4"/>
+            <polyline points="153,19 159,24 167,14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <!-- highlight ring -->
+          <rect x="177" y="27" width="186" height="116" rx="6" fill="none" stroke="#f04925" stroke-width="3" stroke-dasharray="6 4"/>
+          <!-- arrow -->
+          <path d="M 400 80 L 376 80" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+          <text x="410" y="78" font-family="Ubuntu,sans-serif" font-size="13" fill="#f04925" font-weight="600">Tick THIS box</text>
+          <text x="410" y="96" font-family="Ubuntu,sans-serif" font-size="11" fill="#333">(it's all you need)</text>
+
+          <!-- other greyed tiles -->
+          <g transform="translate(380, 30)">
+            <rect width="180" height="110" rx="4" fill="#fff" stroke="#e0e0e0"/>
+            <rect x="8" y="8" width="26" height="26" rx="4" fill="#68217a" opacity="0.4"/>
+            <text x="42" y="26" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#999" font-weight="600">Desktop dev</text>
+            <text x="42" y="42" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#999">with C++</text>
+            <rect x="148" y="8" width="22" height="22" rx="3" fill="#fff" stroke="#bbb"/>
+          </g>
+          <g transform="translate(180, 160)">
+            <rect width="180" height="110" rx="4" fill="#fff" stroke="#e0e0e0"/>
+            <rect x="8" y="8" width="26" height="26" rx="4" fill="#68217a" opacity="0.4"/>
+            <text x="42" y="26" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#999" font-weight="600">.NET desktop</text>
+            <text x="42" y="42" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#999">development</text>
+            <rect x="148" y="8" width="22" height="22" rx="3" fill="#fff" stroke="#bbb"/>
+          </g>
+          <g transform="translate(380, 160)">
+            <rect width="180" height="110" rx="4" fill="#fff" stroke="#e0e0e0"/>
+            <rect x="8" y="8" width="26" height="26" rx="4" fill="#68217a" opacity="0.4"/>
+            <text x="42" y="26" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#999" font-weight="600">Azure development</text>
+            <rect x="148" y="8" width="22" height="22" rx="3" fill="#fff" stroke="#bbb"/>
+          </g>
+
+          <!-- install button bar -->
+          <rect x="0" y="310" width="780" height="50" fill="#fff" stroke="#d0d0d0"/>
+          <rect x="620" y="324" width="120" height="26" rx="3" fill="#0078d4"/>
+          <text x="680" y="342" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#fff" text-anchor="middle" font-weight="600">Install</text>
+
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f04925"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="screenshot-caption">In the Visual Studio Installer, tick the <b>ASP.NET and web development</b> workload tile and click <b>Install</b>.</div>
+      </div>
+
+      <h3>After everything is installed</h3>
+      <p>Open your Start Menu, type <kbd>cmd</kbd>, and press Enter to open a <strong>Command Prompt</strong>. Paste these two commands, pressing Enter after each. You're telling your computer to trust the development certificate your app will use.</p>
+
+<pre><code class="language-bash">dotnet dev-certs https --trust
+git --version</code></pre>
+
+      <p>If the first command asks for permission, click <strong>Yes</strong>. The second should print something like <code>git version 2.45.x</code>. If it does, you're ready.</p>
+
+      <div class="callout success">
+        <i class="bi bi-check-circle"></i>
+        <div class="body"><strong>Done with Step 1.</strong> You only do this once. From now on your computer is set up for building.</div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 2 — Get the project
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s2" class="section">
+      <div class="section-head">
+        <div class="step-badge">2</div>
+        <h2>Get the project onto your computer</h2>
+        <span class="req-tag">Two quick parts</span>
+      </div>
+
+      <p>This step has two halves. First you'll make <strong>your own copy</strong> of the project skeleton on GitHub (a couple of clicks — no code). Then you'll <strong>clone it</strong> to your computer so you can open it in Visual Studio.</p>
+
+      <h3>Part A — Create YOUR repo from the template (in your browser)</h3>
+
+      <p>Your integrator has prepared a starter project that already contains the correct folder structure, packages, and settings. You don't have to build this from scratch — you just click a button and GitHub makes a fresh copy for you.</p>
+
+      <div class="mini-steps">
+        <div class="mini-step">
+          <h4>Open the starter template in your browser</h4>
+          <p>Go to the URL your integrator gave you. It looks like:</p>
+          <p><code>https://github.com/lfz-ai-powered-app/portal-template</code></p>
+          <p>If GitHub asks you to sign in, do that first.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Click the green "Use this template" button</h4>
+          <p>It's near the top of the page, next to the blue <strong>Code</strong> button. Click it, then click <strong>Create a new repository</strong> in the dropdown.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Fill in the short form</h4>
+          <p><strong>Owner</strong>: <code>lfz-ai-powered-app</code> (select it from the dropdown).</p>
+          <p><strong>Repository name</strong>: a short lowercase name like <code>my-portal-app</code> or <code>warehouse-locations</code>. Ask your integrator what to call it if unsure.</p>
+          <p><strong>Private</strong>: leave this selected.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Click "Create repository"</h4>
+          <p>GitHub creates your new repo in a few seconds. The page will refresh and show it — it's now <em>yours</em>, with all the starter code inside.</p>
+        </div>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">GitHub — portal-template repo</div>
+        </div>
+        <svg viewBox="0 0 780 380" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="380" fill="#ffffff"/>
+
+          <!-- GitHub top bar -->
+          <rect width="780" height="48" fill="#24292f"/>
+          <circle cx="28" cy="24" r="12" fill="#fff"/>
+          <text x="28" y="29" font-size="14" text-anchor="middle" fill="#24292f" font-weight="700">⎇</text>
+          <text x="48" y="30" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff">lfz-ai-powered-app</text>
+          <text x="150" y="30" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff" opacity="0.6">/</text>
+          <text x="164" y="30" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff" font-weight="600">portal-template</text>
+          <rect x="282" y="14" width="88" height="22" rx="11" fill="#30363d"/>
+          <text x="326" y="29" font-family="Ubuntu,sans-serif" font-size="11" fill="#f6f8fa" text-anchor="middle">Public template</text>
+
+          <!-- Repo header with buttons -->
+          <rect y="48" width="780" height="90" fill="#ffffff" stroke="#d0d7de"/>
+          <text x="24" y="82" font-family="Ubuntu,sans-serif" font-size="22" fill="#1f2328" font-weight="700">portal-template</text>
+          <text x="24" y="106" font-family="Ubuntu,sans-serif" font-size="13" fill="#656d76">Clean Architecture starter for OnePortal apps.</text>
+          <text x="24" y="124" font-family="Ubuntu,sans-serif" font-size="13" fill="#656d76">Click 'Use this template' to create your own copy.</text>
+
+          <!-- Action buttons (top right) -->
+          <!-- Use this template — GREEN, HIGHLIGHTED -->
+          <rect x="520" y="68" width="168" height="34" rx="6" fill="#1f883d" stroke="#1a7f37"/>
+          <text x="604" y="90" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff" font-weight="600" text-anchor="middle">Use this template ▾</text>
+          <!-- Code button (blue-ish) -->
+          <rect x="696" y="68" width="60" height="34" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+          <text x="712" y="90" font-family="Ubuntu,sans-serif" font-size="13" fill="#1f2328">▸</text>
+          <text x="738" y="90" font-family="Ubuntu,sans-serif" font-size="13" fill="#1f2328" font-weight="500" text-anchor="middle">Code</text>
+
+          <!-- highlight ring -->
+          <rect x="516" y="64" width="176" height="42" rx="8" fill="none" stroke="#f04925" stroke-width="2.5" stroke-dasharray="6 4"/>
+
+          <!-- arrow -->
+          <path d="M 604 132 L 604 110" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrowT)"/>
+          <text x="604" y="152" font-family="Ubuntu,sans-serif" font-size="12" fill="#f04925" font-weight="700" text-anchor="middle">CLICK THIS</text>
+          <text x="604" y="168" font-family="Ubuntu,sans-serif" font-size="10" fill="#656d76" text-anchor="middle">Then choose "Create a new repository"</text>
+
+          <!-- File tree preview -->
+          <rect x="24" y="192" width="732" height="170" fill="#f6f8fa" stroke="#d0d7de"/>
+          <rect x="24" y="192" width="732" height="32" fill="#f6f8fa" stroke="#d0d7de"/>
+          <text x="40" y="212" font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328" font-weight="600">main ▾</text>
+          <text x="120" y="212" font-family="Ubuntu,sans-serif" font-size="11" fill="#656d76">Latest commit: chore: initial scaffold · 2 minutes ago</text>
+
+          <g font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328">
+            <text x="40" y="244">📁 Portal.API</text>
+            <text x="40" y="266">📁 Portal.Application</text>
+            <text x="40" y="288">📁 Portal.Domain</text>
+            <text x="40" y="310">📁 Portal.Infrastructure</text>
+            <text x="40" y="332">📁 Portal.Web</text>
+
+            <text x="380" y="244">📁 sql</text>
+            <text x="380" y="266">📁 .github</text>
+            <text x="380" y="288">📄 CLAUDE.md</text>
+            <text x="380" y="310">📄 Directory.Build.props</text>
+            <text x="380" y="332">📄 nuget.config</text>
+          </g>
+
+          <defs>
+            <marker id="arrowT" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f04925"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="screenshot-caption">The <b>portal-template</b> repo on GitHub. The green <b>Use this template</b> button creates a fresh copy for you in seconds.</div>
+      </div>
+
+      <div class="callout success">
+        <i class="bi bi-check-circle"></i>
+        <div class="body"><strong>Why this works so well:</strong> your new repo has all five projects, all settings, and a clean commit history — as if you'd built it yourself. No "template" label lingers; it's genuinely yours.</div>
+      </div>
+
+      <hr class="spacer">
+
+      <h3>Part B — Clone YOUR repo to your computer (in Visual Studio)</h3>
+
+      <p>Your new repo lives on GitHub. Now you bring a copy onto your machine so you can edit and run it.</p>
+
+      <p>Copy the URL of the repo you just created — it looks like:</p>
+
+<pre><code class="language-text">https://github.com/lfz-ai-powered-app/my-portal-app</code></pre>
+
+      <p>"Cloning" means downloading a copy that stays linked back to GitHub so your changes can sync.</p>
+
+      <div class="mini-steps">
+        <div class="mini-step">
+          <h4>Open Visual Studio</h4>
+          <p>Start Menu → type <strong>Visual Studio 2022</strong> → Enter.</p>
+        </div>
+        <div class="mini-step">
+          <h4>On the welcome window, click "Clone a repository"</h4>
+          <p>It's one of four big buttons on the right. If you missed the welcome screen, use the menu: <strong>File → Clone Repository…</strong></p>
+        </div>
+        <div class="mini-step">
+          <h4>Paste YOUR new repo URL</h4>
+          <p>Paste the URL (the one for the repo YOU just created, not the template) into the top box. Visual Studio auto-fills the local folder — something like <code>C:\Users\You\source\repos\my-portal-app</code>. Leave that as-is.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Click "Clone"</h4>
+          <p>If GitHub asks you to sign in, click <strong>Sign in with browser</strong>, approve the popup, then come back to Visual Studio.</p>
+        </div>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">Visual Studio 2022 — Start Window</div>
+        </div>
+        <svg viewBox="0 0 780 420" xmlns="http://www.w3.org/2000/svg">
+          <!-- VS purple left panel -->
+          <rect width="320" height="420" fill="#5c2d91"/>
+          <!-- VS logo mark -->
+          <g transform="translate(30, 30)">
+            <path d="M 0 20 L 30 0 L 60 20 L 60 60 L 30 80 L 0 60 Z" fill="#fff" opacity="0.15"/>
+            <path d="M 12 22 L 30 10 L 30 70 L 12 58 Z M 48 22 L 30 34 L 30 46 L 48 58 Z" fill="#fff"/>
+          </g>
+          <text x="30" y="138" font-family="Segoe UI,Ubuntu,sans-serif" font-size="24" fill="#fff" font-weight="300">Visual Studio</text>
+          <text x="30" y="164" font-family="Segoe UI,Ubuntu,sans-serif" font-size="14" fill="#fff" opacity="0.85">Welcome! Let's get you started.</text>
+
+          <!-- recent projects placeholder list -->
+          <text x="30" y="220" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#fff" opacity="0.75" font-weight="600">RECENT</text>
+          <rect x="30" y="234" width="260" height="1" fill="#fff" opacity="0.22"/>
+          <text x="30" y="258" font-family="Segoe UI,Ubuntu,sans-serif" font-size="12" fill="#fff" opacity="0.6">(no recent items)</text>
+
+          <!-- right action panel -->
+          <rect x="320" y="0" width="460" height="420" fill="#fff"/>
+
+          <!-- button 1 — Clone, HIGHLIGHTED -->
+          <g transform="translate(356, 50)">
+            <rect width="388" height="70" rx="4" fill="#f5efff" stroke="#f04925" stroke-width="2.5"/>
+            <rect x="16" y="20" width="30" height="30" rx="3" fill="#5c2d91"/>
+            <text x="30" y="40" font-family="Segoe UI,Ubuntu,sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="700">⟋</text>
+            <text x="62" y="32" font-family="Segoe UI,Ubuntu,sans-serif" font-size="14" fill="#111" font-weight="600">Clone a repository</text>
+            <text x="62" y="50" font-family="Segoe UI,Ubuntu,sans-serif" font-size="11" fill="#555">Get code from GitHub, Azure Repos, or another provider</text>
+          </g>
+
+          <!-- button 2 — Open -->
+          <g transform="translate(356, 140)">
+            <rect width="388" height="70" rx="4" fill="#fff" stroke="#d0d0d0"/>
+            <rect x="16" y="20" width="30" height="30" rx="3" fill="#e0e0e0"/>
+            <text x="62" y="32" font-family="Segoe UI,Ubuntu,sans-serif" font-size="14" fill="#444" font-weight="600">Open a project or solution</text>
+            <text x="62" y="50" font-family="Segoe UI,Ubuntu,sans-serif" font-size="11" fill="#888">Open a local Visual Studio project or .sln file</text>
+          </g>
+
+          <!-- button 3 — Open folder -->
+          <g transform="translate(356, 230)">
+            <rect width="388" height="70" rx="4" fill="#fff" stroke="#d0d0d0"/>
+            <rect x="16" y="20" width="30" height="30" rx="3" fill="#e0e0e0"/>
+            <text x="62" y="32" font-family="Segoe UI,Ubuntu,sans-serif" font-size="14" fill="#444" font-weight="600">Open a local folder</text>
+            <text x="62" y="50" font-family="Segoe UI,Ubuntu,sans-serif" font-size="11" fill="#888">Navigate and edit code within any folder</text>
+          </g>
+
+          <!-- button 4 — Create new -->
+          <g transform="translate(356, 320)">
+            <rect width="388" height="70" rx="4" fill="#fff" stroke="#d0d0d0"/>
+            <rect x="16" y="20" width="30" height="30" rx="3" fill="#e0e0e0"/>
+            <text x="62" y="32" font-family="Segoe UI,Ubuntu,sans-serif" font-size="14" fill="#444" font-weight="600">Create a new project</text>
+            <text x="62" y="50" font-family="Segoe UI,Ubuntu,sans-serif" font-size="11" fill="#888">Choose a project template to get started</text>
+          </g>
+
+          <!-- arrow + label -->
+          <path d="M 348 85 L 356 85" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow2)"/>
+          <text x="210" y="80" font-family="Ubuntu,sans-serif" font-size="13" fill="#f04925" font-weight="700" text-anchor="end">Click THIS</text>
+          <text x="210" y="96" font-family="Ubuntu,sans-serif" font-size="11" fill="#fff" text-anchor="end">(top-right option)</text>
+
+          <defs>
+            <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f04925"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="screenshot-caption">On the Visual Studio start window, click <b>Clone a repository</b> (top option on the right).</div>
+      </div>
+
+      <div class="callout info">
+        <i class="bi bi-info-circle"></i>
+        <div class="body">The project should now open automatically. If you see a tree of files on the right (the <em>Solution Explorer</em>), you're in good shape.</div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 3 — Open in Visual Studio
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s3" class="section">
+      <div class="section-head">
+        <div class="step-badge">3</div>
+        <h2>Understand what you see in Visual Studio</h2>
+        <span class="req-tag">Orientation</span>
+      </div>
+
+      <p>Don't panic — you don't need to understand the code. You just need to know where things are.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width: 34%">What you see</th><th>What it means</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Solution Explorer</strong> (right side)</td><td>A folder tree showing every file in your app.</td></tr>
+            <tr><td>Project names ending in <code>.Domain</code>, <code>.Application</code>, <code>.Infrastructure</code>, <code>.API</code>, <code>.Web</code></td><td>The five pieces that make up your app. You don't need to edit them directly — Claude does.</td></tr>
+            <tr><td><strong>Play button</strong> at the top (green triangle)</td><td>Runs your app. You'll use this in Step 5.</td></tr>
+            <tr><td><strong>Git Changes</strong> panel (bottom-right tab)</td><td>Shows what's changed in the project. You'll use this in Step 7.</td></tr>
+            <tr><td><strong>Output</strong> window (bottom)</td><td>Shows messages from your app — helpful if something doesn't run.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">Visual Studio — Solution Explorer</div>
+        </div>
+        <svg viewBox="0 0 780 420" xmlns="http://www.w3.org/2000/svg">
+          <!-- VS title bar -->
+          <rect width="780" height="30" fill="#3c3c3c"/>
+          <rect width="780" height="18" fill="#2d2d30"/>
+          <text x="12" y="12" font-family="Segoe UI,sans-serif" font-size="10" fill="#cccccc">File  Edit  View  Git  Project  Build  Debug  Test</text>
+          <!-- play bar -->
+          <rect y="30" width="780" height="32" fill="#2d2d30"/>
+          <circle cx="22" cy="46" r="7" fill="#68b684"/>
+          <polygon points="19,42 19,50 27,46" fill="#fff"/>
+          <text x="40" y="50" font-family="Segoe UI,sans-serif" font-size="11" fill="#cccccc">▶ MyPortal.API &amp; MyPortal.Web</text>
+
+          <!-- main code area (dim) -->
+          <rect x="0" y="62" width="500" height="358" fill="#1e1e1e"/>
+          <text x="20" y="90" font-family="Ubuntu Mono,monospace" font-size="11" fill="#6a9955">// Welcome to your project. Claude Code</text>
+          <text x="20" y="106" font-family="Ubuntu Mono,monospace" font-size="11" fill="#6a9955">// will fill in the files in Step 4.</text>
+          <text x="20" y="140" font-family="Ubuntu Mono,monospace" font-size="11" fill="#569cd6">using</text>
+          <text x="62" y="140" font-family="Ubuntu Mono,monospace" font-size="11" fill="#d4d4d4">MyPortal.Application;</text>
+          <text x="20" y="156" font-family="Ubuntu Mono,monospace" font-size="11" fill="#569cd6">using</text>
+          <text x="62" y="156" font-family="Ubuntu Mono,monospace" font-size="11" fill="#d4d4d4">MyPortal.Infrastructure;</text>
+          <text x="20" y="190" font-family="Ubuntu Mono,monospace" font-size="11" fill="#569cd6">var</text>
+          <text x="50" y="190" font-family="Ubuntu Mono,monospace" font-size="11" fill="#9cdcfe">builder</text>
+          <text x="103" y="190" font-family="Ubuntu Mono,monospace" font-size="11" fill="#d4d4d4">= WebApplication.CreateBuilder(args);</text>
+
+          <!-- Solution Explorer panel -->
+          <rect x="500" y="62" width="280" height="358" fill="#252526"/>
+          <rect x="500" y="62" width="280" height="28" fill="#2d2d30"/>
+          <text x="512" y="80" font-family="Segoe UI,sans-serif" font-size="11" fill="#cccccc" font-weight="600">Solution Explorer</text>
+
+          <!-- tree -->
+          <g font-family="Segoe UI,Ubuntu,sans-serif" font-size="11.5" fill="#d4d4d4">
+            <!-- Solution -->
+            <text x="512" y="110">▾ 📁 Solution 'MyPortal' (5 projects)</text>
+            <!-- Domain -->
+            <text x="530" y="134">▸ 🧩 MyPortal.Domain</text>
+            <text x="250" y="260" font-family="Ubuntu,sans-serif" font-size="10" fill="#888">(business rules)</text>
+            <!-- Application -->
+            <text x="530" y="158">▸ 🧩 MyPortal.Application</text>
+            <!-- Infrastructure -->
+            <text x="530" y="182">▸ 🧩 MyPortal.Infrastructure</text>
+            <!-- API -->
+            <text x="530" y="206" fill="#4fc1ff">▸ 🌐 MyPortal.API</text>
+            <!-- Web -->
+            <text x="530" y="230" fill="#4fc1ff">▸ 🖥 MyPortal.Web</text>
+            <!-- Tests -->
+            <text x="530" y="254">▸ 🧪 MyPortal.Tests.Unit</text>
+          </g>
+
+          <!-- Git Changes panel hint -->
+          <rect x="500" y="312" width="280" height="108" fill="#2d2d30"/>
+          <text x="512" y="330" font-family="Segoe UI,sans-serif" font-size="11" fill="#cccccc" font-weight="600">Git Changes</text>
+          <text x="512" y="352" font-family="Segoe UI,sans-serif" font-size="10" fill="#888">main ▾</text>
+          <rect x="510" y="362" width="260" height="28" fill="#1e1e1e" stroke="#3c3c3c"/>
+          <text x="518" y="380" font-family="Segoe UI,sans-serif" font-size="10" fill="#6a6a6a" font-style="italic">Enter a message &lt;Required&gt;</text>
+          <rect x="510" y="394" width="120" height="20" rx="2" fill="#3a3a3a"/>
+          <text x="570" y="408" font-family="Segoe UI,sans-serif" font-size="10" fill="#cccccc" text-anchor="middle">Commit All ▾</text>
+
+          <!-- highlight ring on solution explorer -->
+          <rect x="497" y="59" width="286" height="246" rx="6" fill="none" stroke="#f04925" stroke-width="2.5" stroke-dasharray="6 4"/>
+          <path d="M 450 180 L 495 180" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow3)"/>
+          <text x="440" y="180" font-family="Ubuntu,sans-serif" font-size="12" fill="#f04925" font-weight="700" text-anchor="end">Your 5 projects</text>
+          <text x="440" y="196" font-family="Ubuntu,sans-serif" font-size="11" fill="#bbb" text-anchor="end">Each one has a job.</text>
+
+          <defs>
+            <marker id="arrow3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f04925"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="screenshot-caption">Five projects in the <b>Solution Explorer</b> (right panel). Domain, Application, Infrastructure, API, Web — plus a Tests folder. You rarely edit these directly; Claude does.</div>
+      </div>
+
+      <p>Keep Visual Studio open, but minimise it for a moment. Next you'll open Claude Code.</p>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 4 — THE PROMPT
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s4" class="section">
+      <div class="section-head">
+        <div class="step-badge">4</div>
+        <h2>Tell Claude Code what to build</h2>
+        <span class="req-tag">The big step</span>
+      </div>
+
+      <p>This is where the magic happens. Open Claude Code <strong>inside your project folder</strong> (the same folder Visual Studio is showing). Then paste the prompt below.</p>
+
+      <div class="mini-steps">
+        <div class="mini-step">
+          <h4>Open a Command Prompt in your project folder</h4>
+          <p>In Visual Studio: <strong>Tools → Command Line → Developer Command Prompt</strong>. That terminal is already pointing at your project folder.</p>
+          <p>Or: File Explorer → navigate to your project folder → click the address bar → type <code>cmd</code> → press Enter.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Start Claude Code</h4>
+          <p>In that terminal, type <code>claude</code> and press Enter. Claude Code opens in the same window.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Edit <em>one paragraph</em> of the prompt below</h4>
+          <p>Replace the text in the <strong>FEATURE DESCRIPTION</strong> section with what <em>your</em> app needs to do. Everything else stays exactly as it is — it locks in the correct technology stack so your code can be integrated later.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Copy the prompt → paste into Claude Code → press Enter</h4>
+          <p>Use the big orange <strong>Copy</strong> button on the card below. Claude will ask you clarifying questions, then start generating files. Answer plainly — e.g. "yes, include a date column" or "no, skip the delete button".</p>
+        </div>
+      </div>
+
+      <div class="edit-hint">
+        <i class="bi bi-pencil-fill"></i>&nbsp; <strong>You only edit the bit between the triple quotes</strong> (<code>"""</code>). Leave the technical rules alone — they're what makes your app easy to integrate.
+      </div>
+
+      <div class="prompt-card" id="the-prompt">
+        <div class="prompt-head">
+          <span class="tag">THE PROMPT</span>
+          <div class="name">Build my app (paste into Claude Code)</div>
+        </div>
+        <div class="prompt-body-inner">
+          <div class="copy-row">
+            <span class="lbl">Select → Copy, or click the button →</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">
+              <i class="bi bi-clipboard"></i> Copy
+            </button>
+          </div>
+<pre class="prompt-pre language-markdown"><code class="language-markdown" id="prompt-body"></code></pre>
+        </div>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">Command Prompt — Claude Code running inside your project</div>
+        </div>
+        <svg viewBox="0 0 780 360" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="360" fill="#1a1a1a"/>
+
+          <!-- shell prompt lines -->
+          <g font-family="Ubuntu Mono,Consolas,monospace" font-size="12">
+            <text x="18" y="30" fill="#5fd7a7">C:\Users\You\source\repos\my-portal-app&gt;</text>
+            <text x="330" y="30" fill="#ffffff">claude</text>
+
+            <!-- Claude banner -->
+            <rect x="18" y="46" width="744" height="78" fill="#0b0b0b" stroke="#2a2a2a"/>
+            <text x="34" y="70" font-family="Ubuntu,sans-serif" font-size="14" fill="#f04925" font-weight="700">✷ Claude Code</text>
+            <text x="34" y="92" font-family="Ubuntu,sans-serif" font-size="11" fill="#bfbfbf">Opus 4.7 (1M context) · ready in /my-portal-app</text>
+            <text x="34" y="110" font-family="Ubuntu,sans-serif" font-size="11" fill="#888">Type your message. Press Esc to interrupt.</text>
+
+            <!-- user paste of the prompt -->
+            <text x="18" y="152" fill="#5fd7a7">&gt;</text>
+            <text x="34" y="152" fill="#e8e8e8">You are helping me (a non-technical builder) create a working app…</text>
+            <text x="34" y="170" fill="#888">[pasted the big prompt from Step 4]</text>
+
+            <!-- Claude reply -->
+            <text x="18" y="206" fill="#f04925">✷</text>
+            <text x="34" y="206" fill="#e8e8e8">Got it. I'll build an ASP.NET Core 8 + Blazor WASM app with</text>
+            <text x="34" y="224" fill="#e8e8e8">Clean Architecture. A few quick questions:</text>
+
+            <text x="34" y="250" fill="#bfbfbf">1. Should locations allow editing the Code field after create?</text>
+            <text x="34" y="268" fill="#bfbfbf">2. Do you want a search box on the list page?</text>
+
+            <text x="18" y="298" fill="#5fd7a7">&gt;</text>
+            <text x="34" y="298" fill="#fff" font-weight="500">1. no — code is fixed once created</text>
+            <text x="34" y="316" fill="#fff" font-weight="500">2. yes please</text>
+
+            <text x="18" y="344" fill="#f04925">✷</text>
+            <text x="34" y="344" fill="#bfbfbf">Perfect. Generating Domain layer…  <tspan fill="#5fd7a7">●●○○○○</tspan></text>
+          </g>
+
+          <!-- cursor -->
+          <rect x="240" y="334" width="7" height="14" fill="#e8e8e8">
+            <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+          </rect>
+        </svg>
+        <div class="screenshot-caption">Claude Code opens inside your project folder. Paste the prompt, answer its questions in <b>plain English</b>, and it starts generating files.</div>
+      </div>
+
+      <div class="callout info">
+        <i class="bi bi-lightbulb"></i>
+        <div class="body"><strong>While Claude works</strong>, you'll see it creating files. If it asks whether it can run a command, type <kbd>y</kbd> and press Enter. When it says <em>"Build complete"</em> or similar, go to Step 5.</div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 5 — Run it
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s5" class="section">
+      <div class="section-head">
+        <div class="step-badge">5</div>
+        <h2>Run the app on your computer</h2>
+        <span class="req-tag">Press Play</span>
+      </div>
+
+      <p>Switch back to Visual Studio. Your project now has a bunch of new files — that's normal.</p>
+
+      <div class="mini-steps">
+        <div class="mini-step">
+          <h4>Set the startup projects</h4>
+          <p>In <strong>Solution Explorer</strong>, right-click the solution (the very top row, usually bold). Click <strong>Configure Startup Projects…</strong> → select <strong>Multiple startup projects</strong> → find the two ending in <code>.API</code> and <code>.Web</code> → set both to <strong>Start</strong> → click OK.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Press <kbd>Ctrl</kbd> + <kbd>F5</kbd></h4>
+          <p>This runs the app <em>without debugging</em> — it starts much faster than regular <kbd>F5</kbd>. Two browser tabs should open after a few seconds.</p>
+        </div>
+        <div class="mini-step">
+          <h4>You should see two things</h4>
+          <p><strong>Tab 1:</strong> a page titled "Swagger" at <code>https://localhost:7243</code> — that's your back-end. You can ignore it.</p>
+          <p><strong>Tab 2:</strong> your actual app at <code>https://localhost:7154</code> — that's what you'll test.</p>
+        </div>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">Solution Property Pages — Configure Startup Projects</div>
+        </div>
+        <svg viewBox="0 0 780 360" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="360" fill="#f0f0f0"/>
+          <!-- left tree -->
+          <rect x="0" y="0" width="220" height="360" fill="#fff" stroke="#dadce0"/>
+          <text x="16" y="26" font-family="Segoe UI,sans-serif" font-size="12" fill="#333" font-weight="600">Common Properties</text>
+          <text x="28" y="52" font-family="Segoe UI,sans-serif" font-size="12" fill="#f04925" font-weight="600">Startup Project</text>
+          <rect x="14" y="38" width="198" height="22" fill="#fdf3ee"/>
+          <text x="28" y="52" font-family="Segoe UI,sans-serif" font-size="12" fill="#f04925" font-weight="600">Startup Project</text>
+          <text x="28" y="78" font-family="Segoe UI,sans-serif" font-size="12" fill="#555">Project Dependencies</text>
+          <text x="28" y="104" font-family="Segoe UI,sans-serif" font-size="12" fill="#555">Code Analysis Settings</text>
+          <text x="16" y="140" font-family="Segoe UI,sans-serif" font-size="12" fill="#333" font-weight="600">Configuration Properties</text>
+
+          <!-- right panel -->
+          <rect x="220" y="0" width="560" height="360" fill="#fafafa"/>
+          <!-- radio: Current -->
+          <circle cx="252" cy="40" r="7" fill="#fff" stroke="#888" stroke-width="1.5"/>
+          <text x="268" y="44" font-family="Segoe UI,sans-serif" font-size="12" fill="#555">Current selection</text>
+          <!-- radio: Single -->
+          <circle cx="252" cy="68" r="7" fill="#fff" stroke="#888" stroke-width="1.5"/>
+          <text x="268" y="72" font-family="Segoe UI,sans-serif" font-size="12" fill="#555">Single startup project</text>
+          <!-- radio: Multiple — selected -->
+          <circle cx="252" cy="96" r="7" fill="#fff" stroke="#f04925" stroke-width="2"/>
+          <circle cx="252" cy="96" r="3.5" fill="#f04925"/>
+          <text x="268" y="100" font-family="Segoe UI,sans-serif" font-size="12" fill="#111" font-weight="600">Multiple startup projects:</text>
+
+          <!-- table -->
+          <rect x="252" y="118" width="480" height="190" fill="#fff" stroke="#c9ced5"/>
+          <rect x="252" y="118" width="480" height="26" fill="#eef1f5" stroke="#c9ced5"/>
+          <text x="266" y="136" font-family="Segoe UI,sans-serif" font-size="11" fill="#333" font-weight="600">Project</text>
+          <text x="540" y="136" font-family="Segoe UI,sans-serif" font-size="11" fill="#333" font-weight="600">Action</text>
+
+          <!-- rows -->
+          <g font-family="Segoe UI,sans-serif" font-size="11">
+            <rect x="252" y="144" width="480" height="28" fill="#fdf3ee"/>
+            <text x="266" y="162" fill="#111">MyPortal.API</text>
+            <rect x="530" y="150" width="130" height="18" fill="#fff" stroke="#888"/>
+            <text x="540" y="163" fill="#111" font-weight="600">Start</text>
+            <path d="M 650 155 L 654 159 L 660 153" fill="none" stroke="#888" stroke-width="1.5"/>
+
+            <rect x="252" y="172" width="480" height="28" fill="#fff"/>
+            <text x="266" y="190" fill="#111">MyPortal.Application</text>
+            <rect x="530" y="178" width="130" height="18" fill="#fff" stroke="#ccc"/>
+            <text x="540" y="191" fill="#888">None</text>
+
+            <rect x="252" y="200" width="480" height="28" fill="#fff"/>
+            <text x="266" y="218" fill="#111">MyPortal.Domain</text>
+            <rect x="530" y="206" width="130" height="18" fill="#fff" stroke="#ccc"/>
+            <text x="540" y="219" fill="#888">None</text>
+
+            <rect x="252" y="228" width="480" height="28" fill="#fff"/>
+            <text x="266" y="246" fill="#111">MyPortal.Infrastructure</text>
+            <rect x="530" y="234" width="130" height="18" fill="#fff" stroke="#ccc"/>
+            <text x="540" y="247" fill="#888">None</text>
+
+            <rect x="252" y="256" width="480" height="28" fill="#fdf3ee"/>
+            <text x="266" y="274" fill="#111">MyPortal.Web</text>
+            <rect x="530" y="262" width="130" height="18" fill="#fff" stroke="#888"/>
+            <text x="540" y="275" fill="#111" font-weight="600">Start</text>
+
+            <rect x="252" y="284" width="480" height="24" fill="#fff"/>
+            <text x="266" y="300" fill="#111">MyPortal.Tests.Unit</text>
+            <rect x="530" y="288" width="130" height="18" fill="#fff" stroke="#ccc"/>
+            <text x="540" y="301" fill="#888">None</text>
+          </g>
+
+          <!-- OK / Cancel -->
+          <rect x="548" y="322" width="80" height="28" rx="3" fill="#f04925"/>
+          <text x="588" y="340" font-family="Segoe UI,sans-serif" font-size="12" fill="#fff" font-weight="600" text-anchor="middle">OK</text>
+          <rect x="636" y="322" width="80" height="28" rx="3" fill="#fff" stroke="#c9ced5"/>
+          <text x="676" y="340" font-family="Segoe UI,sans-serif" font-size="12" fill="#111" text-anchor="middle">Cancel</text>
+
+          <!-- arrow to Multiple radio -->
+          <path d="M 206 96 L 238 96" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow4)"/>
+          <text x="180" y="90" font-family="Ubuntu,sans-serif" font-size="11" fill="#f04925" font-weight="700" text-anchor="end">Select this</text>
+
+          <defs>
+            <marker id="arrow4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f04925"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="screenshot-caption">Pick <b>Multiple startup projects</b>, then change <b>MyPortal.API</b> and <b>MyPortal.Web</b> to <b>Start</b>. Click OK.</div>
+      </div>
+
+      <div class="callout warning">
+        <i class="bi bi-shield-exclamation"></i>
+        <div class="body">If the browser shows <strong>"Your connection is not private"</strong>, click <strong>Advanced → Proceed to localhost</strong>. That's because your dev certificate isn't trusted by the browser yet — safe on your own machine.</div>
+      </div>
+
+      <h3>What the running app looks like</h3>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">Browser — your app at https://localhost:7154</div>
+        </div>
+        <svg viewBox="0 0 780 440" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="440" fill="#f4f6fa"/>
+
+          <!-- browser tabs row -->
+          <rect width="780" height="34" fill="#dfe3ea"/>
+          <!-- tab 1: localhost:7243 (Swagger) -->
+          <path d="M 10 34 L 14 8 L 180 8 L 184 34 Z" fill="#eef1f5" stroke="#c8cdd4" stroke-width="1"/>
+          <circle cx="26" cy="20" r="5" fill="#68b684"/>
+          <text x="38" y="24" font-family="Segoe UI,sans-serif" font-size="10" fill="#555">localhost:7243 (API)</text>
+
+          <!-- tab 2: localhost:7154 (your app) — ACTIVE -->
+          <path d="M 184 34 L 188 8 L 380 8 L 384 34 Z" fill="#fff" stroke="#c8cdd4" stroke-width="1"/>
+          <circle cx="200" cy="20" r="5" fill="#f04925"/>
+          <text x="212" y="24" font-family="Segoe UI,sans-serif" font-size="10" fill="#111" font-weight="600">localhost:7154 (Your App)</text>
+
+          <!-- url bar -->
+          <rect y="34" width="780" height="38" fill="#fff" stroke="#c8cdd4"/>
+          <rect x="12" y="42" width="24" height="22" rx="11" fill="#eef1f5"/>
+          <text x="24" y="58" text-anchor="middle" font-size="13" fill="#555">←</text>
+          <rect x="44" y="42" width="24" height="22" rx="11" fill="#eef1f5"/>
+          <text x="56" y="58" text-anchor="middle" font-size="13" fill="#555">→</text>
+          <rect x="76" y="42" width="24" height="22" rx="11" fill="#eef1f5"/>
+          <text x="88" y="58" text-anchor="middle" font-size="13" fill="#555">↻</text>
+          <rect x="110" y="42" width="630" height="22" rx="4" fill="#f4f6fa" stroke="#c8cdd4"/>
+          <text x="124" y="58" font-family="Ubuntu Mono,monospace" font-size="11" fill="#111">🔒 https://localhost:7154/locations</text>
+
+          <!-- APP: portal-navy top bar -->
+          <rect y="72" width="780" height="48" fill="#001f57"/>
+          <circle cx="30" cy="96" r="14" fill="#fff"/>
+          <text x="30" y="100" font-family="Ubuntu,sans-serif" font-size="10" fill="#001f57" font-weight="700" text-anchor="middle">LFZ</text>
+          <text x="56" y="102" font-family="Ubuntu,sans-serif" font-size="15" fill="#fff" font-weight="600">MyPortal</text>
+          <text x="680" y="102" font-family="Ubuntu,sans-serif" font-size="12" fill="#fff" opacity="0.8">Dev User ▾</text>
+          <circle cx="735" cy="96" r="10" fill="#f04925"/>
+          <text x="735" y="100" font-size="10" fill="#fff" text-anchor="middle">🌙</text>
+
+          <!-- sidebar -->
+          <rect y="120" width="180" height="320" fill="#f8fafc" stroke="#e2e8f0"/>
+          <text x="20" y="150" font-family="Ubuntu,sans-serif" font-size="11" fill="#64748b" font-weight="600">NAVIGATION</text>
+          <rect x="14" y="160" width="160" height="30" fill="#fff1ec" rx="4"/>
+          <text x="30" y="180" font-family="Ubuntu,sans-serif" font-size="12" fill="#f04925" font-weight="600">📍 Locations</text>
+          <text x="30" y="210" font-family="Ubuntu,sans-serif" font-size="12" fill="#555">🏠 Dashboard</text>
+          <text x="30" y="236" font-family="Ubuntu,sans-serif" font-size="12" fill="#555">📊 Reports</text>
+
+          <!-- main -->
+          <rect x="180" y="120" width="600" height="320" fill="#fff"/>
+          <text x="204" y="156" font-family="Ubuntu,sans-serif" font-size="20" fill="#1e293b" font-weight="700">Warehouse Locations</text>
+          <rect x="640" y="138" width="120" height="32" rx="6" fill="#f04925"/>
+          <text x="700" y="158" font-family="Ubuntu,sans-serif" font-size="12" fill="#fff" font-weight="600" text-anchor="middle">+ Add Location</text>
+
+          <!-- search -->
+          <rect x="204" y="180" width="300" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+          <text x="220" y="200" font-family="Ubuntu,sans-serif" font-size="11" fill="#94a3b8">🔍  Search locations…</text>
+
+          <!-- table header -->
+          <rect x="204" y="224" width="556" height="32" fill="#f1f5f9"/>
+          <text x="220" y="244" font-family="Ubuntu,sans-serif" font-size="11" fill="#1e293b" font-weight="600">CODE</text>
+          <text x="316" y="244" font-family="Ubuntu,sans-serif" font-size="11" fill="#1e293b" font-weight="600">NAME</text>
+          <text x="520" y="244" font-family="Ubuntu,sans-serif" font-size="11" fill="#1e293b" font-weight="600">ACTIVE</text>
+          <text x="640" y="244" font-family="Ubuntu,sans-serif" font-size="11" fill="#1e293b" font-weight="600">ACTIONS</text>
+
+          <!-- rows -->
+          <g font-family="Ubuntu,sans-serif" font-size="12" fill="#374151">
+            <rect x="204" y="256" width="556" height="36" fill="#fff"/>
+            <text x="220" y="278">LFZ-A1</text>
+            <text x="316" y="278">Main Warehouse — Apapa</text>
+            <rect x="520" y="266" width="50" height="18" rx="9" fill="#d1fae5"/>
+            <text x="545" y="279" fill="#047857" font-size="10" font-weight="600" text-anchor="middle">YES</text>
+            <text x="648" y="278" fill="#f04925" font-weight="500">Edit · Deactivate</text>
+
+            <rect x="204" y="292" width="556" height="36" fill="#f8fafc"/>
+            <text x="220" y="314">LFZ-B2</text>
+            <text x="316" y="314">North Depot — Ikorodu</text>
+            <rect x="520" y="302" width="50" height="18" rx="9" fill="#d1fae5"/>
+            <text x="545" y="315" fill="#047857" font-size="10" font-weight="600" text-anchor="middle">YES</text>
+            <text x="648" y="314" fill="#f04925" font-weight="500">Edit · Deactivate</text>
+
+            <rect x="204" y="328" width="556" height="36" fill="#fff"/>
+            <text x="220" y="350">LFZ-C3</text>
+            <text x="316" y="350">Overflow — Ibeju</text>
+            <rect x="520" y="338" width="50" height="18" rx="9" fill="#e2e8f0"/>
+            <text x="545" y="351" fill="#64748b" font-size="10" font-weight="600" text-anchor="middle">NO</text>
+            <text x="648" y="350" fill="#f04925" font-weight="500">Edit · Activate</text>
+          </g>
+        </svg>
+        <div class="screenshot-caption">An example of what your running app might look like — LFZ navy bar, orange accent colour, clear table with actions. Your app will look similar, with your own feature on the page.</div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 6 — Test
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s6" class="section">
+      <div class="section-head">
+        <div class="step-badge">6</div>
+        <h2>Test what you built</h2>
+        <span class="req-tag">Sanity check</span>
+      </div>
+
+      <p>Click through your app like a real user would. Try every button. Try the thing you described to Claude. If anything looks wrong, go back to Claude Code and say so in plain English — e.g. "the Save button doesn't work" or "the date shows incorrectly". Claude will fix it.</p>
+
+      <h3>Before you move on, make sure…</h3>
+
+      <div class="checklist">
+        <label class="checklist-item"><input type="checkbox" data-key="t1"> <span>The app opens in the browser without error messages</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="t2"> <span>Every page you described loads successfully</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="t3"> <span>Every button does what you expect (save, edit, delete, etc.)</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="t4"> <span>When you add data, it's still there after you refresh the page</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="t5"> <span>Error messages are friendly (not red wall-of-text)</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="t6"> <span>Nothing looks clearly broken or half-finished</span></label>
+      </div>
+
+      <h3>How to stop the app</h3>
+      <p>Switch back to Visual Studio and press the red <strong>Stop</strong> button (or close the browser tabs). If Visual Studio itself won't stop, press <kbd>Shift</kbd> + <kbd>F5</kbd>.</p>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 7 — Commit
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s7" class="section">
+      <div class="section-head">
+        <div class="step-badge">7</div>
+        <h2>Commit your work to GitHub</h2>
+        <span class="req-tag">Save your progress</span>
+      </div>
+
+      <p>"Committing" means saving a snapshot of your changes to GitHub so the integrator can pick them up. Visual Studio has a friendly UI for this — you never need to touch the command line.</p>
+
+      <h3 style="margin-top: 14px">Option A — The easy way (Visual Studio's Git panel)</h3>
+
+      <div class="mini-steps">
+        <div class="mini-step">
+          <h4>Open the Git Changes panel</h4>
+          <p>Menu: <strong>View → Git Changes</strong> (or the shortcut <kbd>Ctrl</kbd>+<kbd>0</kbd>, then <kbd>Ctrl</kbd>+<kbd>G</kbd>). You'll see a list of files you changed.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Create a new branch</h4>
+          <p>At the top of the panel, click the current branch name (usually <code>main</code>) → <strong>New Branch</strong> → name it something like <code>feat/my-feature</code> → click <strong>Create Branch</strong>.</p>
+          <p><em>Why: you never commit directly to <code>main</code>. Always work in a branch.</em></p>
+        </div>
+        <div class="mini-step">
+          <h4>Write a commit message</h4>
+          <p>In the big text box at the top of Git Changes, type a short sentence describing what you did. Examples:</p>
+          <p style="margin-top:6px; color: var(--text-muted); font-style: italic">• "Add page for managing warehouse locations"<br>• "Fix the Save button on the Edit page"<br>• "Apply LFZ colours to the navigation bar"</p>
+        </div>
+        <div class="mini-step">
+          <h4>Click <strong>Commit All</strong></h4>
+          <p>That button is right below the message box. A green bar confirms it worked.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Click <strong>Push</strong></h4>
+          <p>You'll see a "Push" button in the top bar of the Git Changes panel (an up-arrow icon). Click it. Visual Studio uploads your branch to GitHub.</p>
+        </div>
+        <div class="mini-step">
+          <h4>Open a Pull Request</h4>
+          <p>After pushing, a yellow "Create a pull request" bar appears. Click it — it opens GitHub in your browser with a form. Write a sentence about what you built, then click <strong>Create pull request</strong>.</p>
+          <p><em>A Pull Request is just a formal "please review my work" notification to the integrator.</em></p>
+        </div>
+      </div>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">Visual Studio — Git Changes panel</div>
+        </div>
+        <svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="460" fill="#1e1e1e"/>
+          <!-- left code editor (dim) -->
+          <rect x="0" y="0" width="420" height="460" fill="#1e1e1e"/>
+          <g font-family="Ubuntu Mono,Consolas,monospace" font-size="11" opacity="0.6">
+            <text x="16" y="24" fill="#6a9955">// LocationsController.cs</text>
+            <text x="16" y="48" fill="#569cd6">namespace</text>
+            <text x="100" y="48" fill="#d4d4d4">MyPortal.API.Controllers;</text>
+            <text x="16" y="76" fill="#c586c0">[ApiController]</text>
+            <text x="16" y="92" fill="#c586c0">[Route(</text>
+            <text x="82" y="92" fill="#ce9178">"api/locations"</text>
+            <text x="192" y="92" fill="#c586c0">)]</text>
+            <text x="16" y="108" fill="#569cd6">public class</text>
+            <text x="108" y="108" fill="#4ec9b0">LocationsController</text>
+          </g>
+
+          <!-- Git Changes panel -->
+          <rect x="420" y="0" width="360" height="460" fill="#252526"/>
+          <rect x="420" y="0" width="360" height="30" fill="#2d2d30"/>
+          <text x="436" y="20" font-family="Segoe UI,sans-serif" font-size="12" fill="#fff" font-weight="600">Git Changes</text>
+
+          <!-- branch selector -->
+          <rect x="432" y="40" width="336" height="28" fill="#1e1e1e" stroke="#3c3c3c"/>
+          <text x="446" y="58" font-family="Segoe UI,sans-serif" font-size="11" fill="#4fc1ff" font-weight="600">⎇ feat/locations-page ▾</text>
+          <text x="700" y="58" font-family="Segoe UI,sans-serif" font-size="18" fill="#fff">↑</text>
+
+          <!-- arrow to Push button -->
+          <path d="M 760 58 L 720 58" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow5)"/>
+          <text x="768" y="44" font-family="Ubuntu,sans-serif" font-size="10" fill="#f04925" font-weight="700" text-anchor="end">Push</text>
+
+          <!-- commit message label -->
+          <text x="432" y="90" font-family="Segoe UI,sans-serif" font-size="11" fill="#bbb" font-weight="600">Message (required)</text>
+
+          <!-- commit message box -->
+          <rect x="432" y="96" width="336" height="56" fill="#1e1e1e" stroke="#3c3c3c"/>
+          <text x="444" y="116" font-family="Segoe UI,sans-serif" font-size="11" fill="#e8e8e8">Add page for managing warehouse</text>
+          <text x="444" y="134" font-family="Segoe UI,sans-serif" font-size="11" fill="#e8e8e8">locations (list, add, edit, deactivate)</text>
+
+          <!-- Commit All button -->
+          <rect x="432" y="160" width="336" height="32" rx="3" fill="#f04925"/>
+          <text x="600" y="180" font-family="Segoe UI,sans-serif" font-size="12" fill="#fff" font-weight="600" text-anchor="middle">Commit All ▾</text>
+
+          <!-- Changes section -->
+          <text x="432" y="214" font-family="Segoe UI,sans-serif" font-size="11" fill="#bbb" font-weight="600">Changes (7)</text>
+
+          <g font-family="Segoe UI,Ubuntu,sans-serif" font-size="11.5" fill="#d4d4d4">
+            <!-- row -->
+            <rect x="432" y="222" width="336" height="22" fill="#2d2d30"/>
+            <circle cx="444" cy="233" r="4" fill="#68b684"/>
+            <text x="456" y="237">LocationsController.cs</text>
+            <text x="760" y="237" fill="#68b684" text-anchor="end">A</text>
+
+            <rect x="432" y="244" width="336" height="22" fill="#252526"/>
+            <circle cx="444" cy="255" r="4" fill="#68b684"/>
+            <text x="456" y="259">Location.cs</text>
+            <text x="760" y="259" fill="#68b684" text-anchor="end">A</text>
+
+            <rect x="432" y="266" width="336" height="22" fill="#2d2d30"/>
+            <circle cx="444" cy="277" r="4" fill="#68b684"/>
+            <text x="456" y="281">LocationConfiguration.cs</text>
+            <text x="760" y="281" fill="#68b684" text-anchor="end">A</text>
+
+            <rect x="432" y="288" width="336" height="22" fill="#252526"/>
+            <circle cx="444" cy="299" r="4" fill="#68b684"/>
+            <text x="456" y="303">AddLocationsPage.cs (migration)</text>
+            <text x="760" y="303" fill="#68b684" text-anchor="end">A</text>
+
+            <rect x="432" y="310" width="336" height="22" fill="#2d2d30"/>
+            <circle cx="444" cy="321" r="4" fill="#f59e0b"/>
+            <text x="456" y="325">ApplicationDbContext.cs</text>
+            <text x="760" y="325" fill="#f59e0b" text-anchor="end">M</text>
+
+            <rect x="432" y="332" width="336" height="22" fill="#252526"/>
+            <circle cx="444" cy="343" r="4" fill="#68b684"/>
+            <text x="456" y="347">LocationsPage.razor</text>
+            <text x="760" y="347" fill="#68b684" text-anchor="end">A</text>
+
+            <rect x="432" y="354" width="336" height="22" fill="#2d2d30"/>
+            <circle cx="444" cy="365" r="4" fill="#68b684"/>
+            <text x="456" y="369">LocationsHandlerTests.cs</text>
+            <text x="760" y="369" fill="#68b684" text-anchor="end">A</text>
+          </g>
+
+          <!-- Actions section label -->
+          <text x="432" y="404" font-family="Segoe UI,sans-serif" font-size="10" fill="#888">A = added · M = modified</text>
+          <!-- arrow to commit message -->
+          <path d="M 408 124 L 428 124" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow5)"/>
+          <text x="400" y="124" font-family="Ubuntu,sans-serif" font-size="11" fill="#f04925" font-weight="700" text-anchor="end">Write a sentence</text>
+          <text x="400" y="140" font-family="Ubuntu,sans-serif" font-size="10" fill="#bbb" text-anchor="end">about what you built</text>
+
+          <!-- arrow to commit button -->
+          <path d="M 408 176 L 428 176" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow5)"/>
+          <text x="400" y="180" font-family="Ubuntu,sans-serif" font-size="11" fill="#f04925" font-weight="700" text-anchor="end">then click here</text>
+
+          <defs>
+            <marker id="arrow5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f04925"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="screenshot-caption">The <b>Git Changes</b> panel in Visual Studio. Type a message → click <b>Commit All</b> → then click the up-arrow at the top to <b>Push</b>.</div>
+      </div>
+
+      <h3>After pushing — GitHub asks you to open a Pull Request</h3>
+
+      <div class="screenshot">
+        <div class="screenshot-chrome">
+          <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+          <div class="title">GitHub — Open a pull request</div>
+        </div>
+        <svg viewBox="0 0 780 440" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="440" fill="#ffffff"/>
+          <!-- GitHub top bar -->
+          <rect width="780" height="48" fill="#24292f"/>
+          <circle cx="28" cy="24" r="12" fill="#fff"/>
+          <text x="28" y="29" font-size="14" text-anchor="middle" fill="#24292f" font-weight="700">⎇</text>
+          <text x="48" y="30" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff">lfz-ai-powered-app</text>
+          <text x="150" y="30" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff" opacity="0.6">/</text>
+          <text x="164" y="30" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff" font-weight="600">my-portal-app</text>
+
+          <!-- Compare changes header -->
+          <rect y="48" width="780" height="60" fill="#f6f8fa" stroke="#d0d7de"/>
+          <text x="24" y="80" font-family="Ubuntu,sans-serif" font-size="20" fill="#1f2328" font-weight="600">Open a pull request</text>
+          <text x="24" y="100" font-family="Ubuntu,sans-serif" font-size="12" fill="#656d76">Create a new pull request by comparing changes across two branches.</text>
+
+          <!-- branch selector row -->
+          <rect x="24" y="124" width="732" height="40" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+          <text x="40" y="148" font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328">base:</text>
+          <rect x="80" y="130" width="120" height="28" rx="6" fill="#fff" stroke="#d0d7de"/>
+          <text x="92" y="148" font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328" font-weight="600">main</text>
+          <text x="210" y="148" font-family="Ubuntu,sans-serif" font-size="14" fill="#656d76">←</text>
+          <text x="232" y="148" font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328">compare:</text>
+          <rect x="296" y="130" width="230" height="28" rx="6" fill="#fff" stroke="#d0d7de"/>
+          <text x="308" y="148" font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328" font-weight="600">feat/locations-page</text>
+          <text x="550" y="148" font-family="Ubuntu,sans-serif" font-size="12" fill="#1a7f37">✓ Able to merge</text>
+
+          <!-- title field -->
+          <text x="24" y="194" font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328" font-weight="600">Add a title</text>
+          <rect x="24" y="202" width="732" height="38" rx="6" fill="#fff" stroke="#d0d7de" stroke-width="1.5"/>
+          <text x="40" y="226" font-family="Ubuntu,sans-serif" font-size="13" fill="#1f2328">feat: add page for managing warehouse locations</text>
+
+          <!-- description -->
+          <text x="24" y="270" font-family="Ubuntu,sans-serif" font-size="12" fill="#1f2328" font-weight="600">Add a description</text>
+          <rect x="24" y="278" width="732" height="110" rx="6" fill="#fff" stroke="#d0d7de"/>
+          <g font-family="Ubuntu Mono,monospace" font-size="11" fill="#1f2328">
+            <text x="40" y="300">## What I built</text>
+            <text x="40" y="320">- Locations list with search</text>
+            <text x="40" y="336">- Add / Edit / Deactivate flows</text>
+            <text x="40" y="352">- FluentValidation on the Code field (3–10 uppercase)</text>
+            <text x="40" y="372">📷 Screenshot attached — app running at localhost:7154</text>
+          </g>
+
+          <!-- Create PR button -->
+          <rect x="604" y="400" width="152" height="32" rx="6" fill="#1f883d"/>
+          <text x="680" y="421" font-family="Ubuntu,sans-serif" font-size="13" fill="#fff" font-weight="600" text-anchor="middle">Create pull request ▾</text>
+
+          <rect x="24" y="400" width="140" height="32" rx="6" fill="#fff" stroke="#d0d7de"/>
+          <text x="94" y="421" font-family="Ubuntu,sans-serif" font-size="13" fill="#1f2328" text-anchor="middle">Reviewers</text>
+
+          <!-- arrow to Create PR -->
+          <path d="M 604 440 L 680 440" stroke="#f04925" stroke-width="0" fill="none"/>
+          <path d="M 760 395 L 740 407" stroke="#f04925" stroke-width="2.5" fill="none" marker-end="url(#arrow6)"/>
+          <text x="770" y="388" font-family="Ubuntu,sans-serif" font-size="11" fill="#f04925" font-weight="700" text-anchor="end">Click this green button</text>
+
+          <defs>
+            <marker id="arrow6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f04925"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="screenshot-caption">On GitHub, write a short title + a few lines describing what you built. Then click the green <b>Create pull request</b> button. Done.</div>
+      </div>
+
+      <hr class="spacer">
+
+      <h3>Option B — If you prefer the terminal</h3>
+      <p>Ask Claude Code to do it for you. Paste this into Claude Code:</p>
+
+<pre><code class="language-text">Please do the following for me:
+1. Show me what I've changed (git status).
+2. Create a new branch called feat/&lt;short-name&gt; (ask me for a name if you're not sure).
+3. Stage every file EXCEPT secrets, .env, *.pfx, bin/, obj/.
+4. Commit with a clear one-line message describing what we built.
+5. Push the branch to GitHub.
+6. Open a Pull Request for me using `gh pr create`.
+
+After each step, tell me what happened in plain English.</code></pre>
+
+      <div class="callout danger">
+        <i class="bi bi-shield-x"></i>
+        <div class="body"><strong>One golden rule:</strong> never commit files containing passwords, API keys, or connection strings. If Claude asks about a file that looks sensitive, say <strong>skip it</strong>.</div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 8 — Handoff
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="s8" class="section">
+      <div class="section-head">
+        <div class="step-badge">8</div>
+        <h2>Hand it over</h2>
+        <span class="req-tag">Delivery</span>
+      </div>
+
+      <p>Your work is now on GitHub. Send your integrator a quick message with:</p>
+
+      <div class="checklist">
+        <label class="checklist-item"><input type="checkbox" data-key="h1"> <span>The link to the Pull Request you opened (it's in your browser's address bar after Step 7)</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="h2"> <span>One screenshot of the app running in your browser</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="h3"> <span>A one-line summary of what you built</span></label>
+        <label class="checklist-item"><input type="checkbox" data-key="h4"> <span>Anything you noticed that didn't work perfectly (honesty helps — we'll fix it together)</span></label>
+      </div>
+
+      <p>The integrator reviews your code, wires it into OnePortal, and deploys it. If anything needs to change, they'll leave comments on the Pull Request — you'll get a notification.</p>
+
+      <div class="callout success">
+        <i class="bi bi-trophy"></i>
+        <div class="body"><strong>You're done!</strong> You built an app from nothing, ran it locally, tested it, and handed it off. The technical integration is someone else's job.</div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TROUBLESHOOTING
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="trouble" class="section">
+      <div class="section-head">
+        <div class="step-badge" style="background: linear-gradient(135deg, var(--portal-navy), var(--lfz-navy));"><i class="bi bi-life-preserver"></i></div>
+        <h2>If something breaks</h2>
+        <span class="req-tag">Relax</span>
+      </div>
+
+      <p>You will hit a problem at some point — everyone does. The fix is nearly always one of these:</p>
+
+      <div class="grid-2">
+        <div class="mini-card">
+          <h4><i class="bi bi-1-circle-fill" style="color:var(--lfz-orange)"></i> Copy the error, paste it into Claude Code</h4>
+          <p>Say "this error happened when I did X". Claude fixes most things in one or two rounds.</p>
+        </div>
+        <div class="mini-card">
+          <h4><i class="bi bi-2-circle-fill" style="color:var(--lfz-orange)"></i> Stop and re-run the app</h4>
+          <p>Press the red Stop button in Visual Studio, then press <kbd>Ctrl</kbd>+<kbd>F5</kbd> again. Fixes 30% of weird issues.</p>
+        </div>
+        <div class="mini-card">
+          <h4><i class="bi bi-3-circle-fill" style="color:var(--lfz-orange)"></i> Close and reopen Visual Studio</h4>
+          <p>If it's acting weird or showing stale files, restart it. Nothing is lost.</p>
+        </div>
+        <div class="mini-card">
+          <h4><i class="bi bi-4-circle-fill" style="color:var(--lfz-orange)"></i> Ask your integrator</h4>
+          <p>Stuck for more than 30 minutes? Message them. They've seen most of the problems before.</p>
+        </div>
+      </div>
+
+      <h3>Common issues, explained</h3>
+
+      <div class="mini-card" style="margin-bottom:12px">
+        <h4><i class="bi bi-exclamation-triangle" style="color:var(--warning)"></i> Browser says "Your connection is not private"</h4>
+        <p>Click <strong>Advanced → Proceed to localhost</strong>. Or re-run <code>dotnet dev-certs https --trust</code> in Command Prompt.</p>
+      </div>
+
+      <div class="mini-card" style="margin-bottom:12px">
+        <h4><i class="bi bi-exclamation-triangle" style="color:var(--warning)"></i> The app takes 15–20 seconds to start the first time</h4>
+        <p>Normal for the very first run — your computer is compiling things. Subsequent runs are fast. Always use <kbd>Ctrl</kbd>+<kbd>F5</kbd>, never <kbd>F5</kbd> alone (debug mode is 3–4× slower).</p>
+      </div>
+
+      <div class="mini-card" style="margin-bottom:12px">
+        <h4><i class="bi bi-exclamation-triangle" style="color:var(--warning)"></i> "Cannot connect to SQL Server"</h4>
+        <p>SQL LocalDB sometimes goes to sleep. Open Command Prompt and run: <code>sqllocaldb start MSSQLLocalDB</code>. Then press <kbd>Ctrl</kbd>+<kbd>F5</kbd> again.</p>
+      </div>
+
+      <div class="mini-card" style="margin-bottom:12px">
+        <h4><i class="bi bi-exclamation-triangle" style="color:var(--warning)"></i> "Port 7243 is already in use"</h4>
+        <p>Another instance is still running. Open Task Manager (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd>), find anything with "dotnet" or your project name, end those tasks, and re-run.</p>
+      </div>
+
+      <div class="mini-card" style="margin-bottom:12px">
+        <h4><i class="bi bi-exclamation-triangle" style="color:var(--warning)"></i> Git Changes is empty after Claude worked</h4>
+        <p>In Visual Studio: <strong>View → Git Changes</strong>. If still empty, close and reopen Visual Studio — it'll pick up the changes on disk.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         GLOSSARY
+    ═══════════════════════════════════════════════════════════════ -->
+    <section id="glossary" class="section">
+      <div class="section-head">
+        <div class="step-badge" style="background: linear-gradient(135deg, var(--portal-navy), var(--lfz-navy));"><i class="bi bi-book"></i></div>
+        <h2>Glossary</h2>
+        <span class="req-tag">Jargon-free</span>
+      </div>
+
+      <p>Terms you'll see people throw around. No need to memorise — skim and come back when you need it.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:26%">Term</th><th>What it means in plain English</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Clone</strong></td><td>Download a copy of the project from GitHub onto your machine.</td></tr>
+            <tr><td><strong>Commit</strong></td><td>Save a snapshot of your work with a short description.</td></tr>
+            <tr><td><strong>Push</strong></td><td>Upload your commits to GitHub so others can see them.</td></tr>
+            <tr><td><strong>Branch</strong></td><td>A parallel workspace. You always work in a branch, not on <code>main</code>.</td></tr>
+            <tr><td><strong>Pull Request (PR)</strong></td><td>A formal "please review my work" message on GitHub.</td></tr>
+            <tr><td><strong>Solution</strong></td><td>The whole project in Visual Studio. Contains all the sub-projects.</td></tr>
+            <tr><td><strong>Build</strong></td><td>Turn the code into a runnable program. Visual Studio does this automatically when you press <kbd>Ctrl</kbd>+<kbd>F5</kbd>.</td></tr>
+            <tr><td><strong>Localhost</strong></td><td>Your own computer. URLs like <code>localhost:7154</code> only work on your machine.</td></tr>
+            <tr><td><strong>Migration</strong></td><td>An instruction for setting up the database. Claude creates these automatically.</td></tr>
+            <tr><td><strong>Integrator</strong></td><td>The person on your team who takes your finished code and deploys it into OnePortal. That's who you hand off to in Step 8.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align:center; color:var(--text-muted); font-size:0.88rem; padding-top:20px;">
+      <p>Build Your App — A Simple Guide · Lagos Free Zone · Internal</p>
+      <p style="opacity:0.7; font-size:0.82rem">Got stuck or spotted something wrong with this guide? Tell your integrator — we improve it every time.</p>
+    </footer>
+
+  </main>
+</div>
+
+<!-- Progress -->
+<div class="progress-badge" id="progressBadge">
+  <i class="bi bi-check2-square"></i>
+  Progress: <span class="count" id="progressCount">0 / 10</span>
+</div>
+
+<!-- ═════ THE BUILD PROMPT ═════ -->
+<script id="prompt-text" type="text/plain">
+You are helping me (a non-technical builder) create a working app for Lagos Free Zone.
+Someone else will integrate it with OnePortal later — I just need a solid, local,
+standalone app that they can pick up and deploy.
+
+# THE RULES (do not break any of these — they make integration smooth)
+
+Technology stack (mandatory):
+- ASP.NET Core 8 (Web API)
+- Blazor WebAssembly for the front-end
+- Entity Framework Core + SQL Server LocalDB for the database
+- MediatR for request handlers
+- FluentValidation for input validation
+- AutoMapper for mapping between layers
+- xUnit for unit tests
+
+Architecture (mandatory — "Clean Architecture"):
+Create exactly these five projects if they don't already exist:
+  1. <Name>.Domain          — pure business rules, no frameworks
+  2. <Name>.Application     — use cases (MediatR commands/queries + validators)
+  3. <Name>.Infrastructure  — EF Core DbContext, repositories, SQL
+  4. <Name>.API             — ASP.NET Core Web API (the back-end)
+  5. <Name>.Web             — Blazor WebAssembly (the front-end)
+Dependencies point inward only: Domain ← Application ← Infrastructure ← API.
+Web is a separate client that calls the API over HTTPS.
+
+Local run setup:
+- API listens on https://localhost:7243 (do not change this port).
+- Web listens on https://localhost:7154 (do not change this port).
+- Both projects must start together on Ctrl+F5.
+- Database uses LocalDB: Server=(localdb)\MSSQLLocalDB;Database=<Name>Db;Trusted_Connection=True;TrustServerCertificate=True;
+- EF Core migrations only — never EnsureCreated.
+- Apply migrations automatically on first run if possible.
+
+Visual style:
+- Use Ubuntu font from Google Fonts.
+- Bootstrap Icons + Font Awesome 6 from CDN for icons.
+- Colours: navy #002b5c, portal navy #001f57, accent orange #f04925.
+- Top-bar header (navy), left sidebar navigation, main content area.
+- Light and dark mode — toggle a `.dark-theme` class on <html>.
+
+Quality rules:
+- Every command / query has a FluentValidation validator.
+- Every API endpoint has [Authorize] OR explicit [AllowAnonymous] — never default.
+- Every MediatR handler has ONE happy-path unit test in <Name>.Tests.Unit.
+- All dates in UTC (DateTime.UtcNow, never DateTime.Now).
+- No secrets in appsettings.json — use User Secrets for local dev.
+- CORS pinned to exact origins, never AllowAnyOrigin with credentials.
+- .gitignore excludes bin/, obj/, *.secrets.json, *.pfx, .env.
+
+Authentication placeholder (IMPORTANT):
+Do NOT try to integrate with OnePortal yourself. Just leave a simple login placeholder
+(a stub /api/auth/me endpoint and a hardcoded dev user) so the app runs standalone.
+My integrator will replace the auth later on their side. Write a // TODO comment where
+the OnePortal integration would go.
+
+# WHAT I WANT YOU TO BUILD
+
+"""
+FEATURE DESCRIPTION — replace this whole block with YOUR app in plain English.
+
+Example:
+"A simple warehouse-locations app. Users should be able to:
+  - See a list of locations (code, name, address, active yes/no)
+  - Add a new location
+  - Edit an existing one
+  - Mark a location inactive (don't hard-delete)
+Each location has:
+  - Code: 3-10 uppercase letters, required, unique
+  - Name: required, up to 100 characters
+  - Address: optional, up to 250 characters
+  - Active: yes/no, defaults to yes
+Only users with the 'manage-locations' permission can add/edit/deactivate.
+Everyone can view the list."
+"""
+
+# HOW TO WORK
+
+1. Read the project folder. If it's empty, scaffold the five projects from scratch.
+   If projects already exist, ADD to them — don't delete or rename anything.
+2. Ask me clarifying questions BEFORE generating code if the feature description is ambiguous.
+3. Generate code in this order so I can sanity-check each layer:
+   Domain → Application → Infrastructure → API → Web → Tests.
+4. Run `dotnet build` after each layer and fix any errors before moving on.
+5. Generate an EF migration and apply it to LocalDB with `dotnet ef database update`.
+6. Finally run `dotnet test`. Every test must pass.
+7. When done, print a short summary: files created, the two local URLs, and how I test it.
+
+# WHAT NOT TO DO
+
+- Don't add OnePortal SDK, RabbitMQ, or any auth integration. Leave the placeholder.
+- Don't add React, Angular, Next.js, or any non-Blazor frontend.
+- Don't put EF Core attributes on Domain entities.
+- Don't put business logic in API controllers.
+- Don't commit any secrets.
+- Don't edit files you didn't need to change.
+
+When you're ready, start by asking me any questions you have about the feature.
+</script>
+
+<!-- ═════ BEHAVIOUR ═════ -->
+<script>
+// Populate the prompt text into the visible code block (escaped).
+const promptRaw = document.getElementById('prompt-text').textContent.trim();
+document.getElementById('prompt-body').textContent = promptRaw;
+
+// Copy button
+function copyPrompt(btn) {
+  navigator.clipboard.writeText(promptRaw).then(() => {
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+      btn.classList.remove('copied');
+    }, 1800);
+  });
+}
+
+// Theme toggle
+const themeBtn = document.getElementById('themeToggle');
+function applyTheme(t) {
+  document.documentElement.classList.toggle('dark-theme', t === 'dark');
+  themeBtn.querySelector('i').className = t === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+}
+applyTheme(localStorage.getItem('lfz-guide-theme') || 'light');
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.classList.contains('dark-theme') ? 'light' : 'dark';
+  localStorage.setItem('lfz-guide-theme', next);
+  applyTheme(next);
+});
+
+// Mobile sidebar toggle
+const sidebar = document.getElementById('sidebar');
+document.getElementById('menuToggle').addEventListener('click', () => sidebar.classList.toggle('open'));
+document.querySelectorAll('#sidebar a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// Scrollspy
+const tocLinks = document.querySelectorAll('#toc a, .toc a');
+const tocMap = {};
+tocLinks.forEach(a => { tocMap[a.getAttribute('href').slice(1)] = a; });
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(a => a.classList.remove('active'));
+      const a = tocMap[e.target.id];
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+document.querySelectorAll('main section[id]').forEach(s => io.observe(s));
+
+// Persistent checklists
+const CHECK_KEY = 'lfz-simple-guide-checks';
+const checkState = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+const allChecks = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+allChecks.forEach(cb => {
+  const key = cb.dataset.key;
+  if (checkState[key]) cb.checked = true;
+  cb.addEventListener('change', () => {
+    checkState[key] = cb.checked;
+    localStorage.setItem(CHECK_KEY, JSON.stringify(checkState));
+    updateProgress();
+  });
+});
+function updateProgress() {
+  const done = Array.from(allChecks).filter(cb => cb.checked).length;
+  document.getElementById('progressCount').textContent = `${done} / ${allChecks.length}`;
+}
+updateProgress();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+<script>
+  if (window.Prism) Prism.highlightAll();
+</script>
+
+</body>
+</html>
